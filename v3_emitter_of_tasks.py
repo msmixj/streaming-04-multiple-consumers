@@ -2,14 +2,15 @@
     This program sends a message to a queue on the RabbitMQ server.
     Make tasks harder/longer-running by adding dots at the end of the message.
 
-    Original Author: Denise Case (modified by Susie Smith on 5/27/24)
-    Date: January 15, 2023
+    Author: Susie Smith
+    Date: May 27, 2024
 
 """
 
 import pika
 import sys
 import webbrowser
+import csv
 
 def offer_rabbitmq_admin_site():
     """Offer to open the RabbitMQ Admin website"""
@@ -52,17 +53,30 @@ def send_message(host: str, queue_name: str, message: str):
         # close the connection to the server
         conn.close()
 
+# Read tasks from csv and send to RabbitMQ server
+def read_and_send_tasks_from_csv(file_path: str, host: str, queue_name: str):
+    with open(file_path, newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader: 
+            message = " ".join(row)
+            send_message(host, queue_name, message)
+
 # Standard Python idiom to indicate main program entry point
 # This allows us to import this module and use its functions
 # without executing the code below.
 # If this is the program being run, then execute the code below
 if __name__ == "__main__":  
     # ask the user if they'd like to open the RabbitMQ Admin site
-    offer_rabbitmq_admin_site()
-    # get the message from the command line
-    # if no arguments are provided, use the default message
-    # use the join method to convert the list of arguments into a string
-    # join by the space character inside the quotes
-    message = " ".join(sys.argv[1:]) or "Second task......"
-    # send the message to the queue
-    send_message("localhost","task_queue2",message)
+    show_offer = False
+    if show_offer is True:
+        offer_rabbitmq_admin_site()
+
+    #
+
+    # Define the filename, host and queue name
+    file_name = 'tasks.csv'
+    host = "localhost"
+    queue_name = "task_queue3"
+
+    # send names of tasks from the csv to the queue
+    read_and_send_tasks_from_csv(file_name, "localhost", "task_queue3")
